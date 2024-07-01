@@ -18,6 +18,7 @@ const ContactScreen = () => {
                     throw new Error('User token not found in AsyncStorage');
                 }
 
+                console.log('Fetching voice token...');
                 const response = await fetch(
                     `https://dev-api.salescaptain.com/api/v1/voice/call-token/fe1d5680-81ae-44f5-8000-cb952f873266`,
                     {
@@ -29,15 +30,21 @@ const ContactScreen = () => {
                     }
                 );
 
+                if (response.status === 429) {
+                    throw new Error('Rate limit exceeded');
+                }
+
                 if (!response.ok) {
                     throw new Error('Failed to fetch voice token');
                 }
 
                 const result = await response.json();
                 const newVoiceToken = result.data.entity.token;
+                console.log('New Voice Token:', newVoiceToken);
 
                 setVoiceToken(newVoiceToken);
                 await AsyncStorage.setItem('voiceToken', newVoiceToken);
+                console.log('Voice token fetched and stored successfully');
             } catch (error) {
                 console.error('Error fetching voice token:', error);
                 Alert.alert('Error', 'Failed to fetch voice token');
@@ -48,18 +55,24 @@ const ContactScreen = () => {
     }, []);
 
     const handleIncomingCallInvite = (callInvite) => {
+        console.log('Incoming call invite:', callInvite);
         callInvite.accept();
     };
 
     useEffect(() => {
         if (voiceToken) {
+            console.log('Registering with voiceToken:', voiceToken);
             voice.register(voiceToken);
+            console.log('Registered with Twilio Voice SDK');
 
             voice.on(Voice.Event.CallInvite, handleIncomingCallInvite);
+            console.log('Registered for CallInvite event');
 
             return () => {
                 voice.unregister(voiceToken);
+                console.log('Unregistered from Twilio Voice SDK');
                 voice.removeAllListeners();
+                console.log('Removed all listeners');
             };
         }
     }, [voiceToken]);
@@ -76,6 +89,7 @@ const ContactScreen = () => {
                 return;
             }
 
+            console.log('Initiating call to:', phoneNumber);
             setCallState('connecting');
 
             const callParams = {
@@ -87,30 +101,42 @@ const ContactScreen = () => {
                 }
             };
 
+            console.log('Call parameters:', callParams);
+
             const call = await voice.connect(voiceToken, callParams);
+
+            console.log('Call initiated:', call);
 
             if (!call || typeof call !== 'object' || !call.on) {
                 throw new Error('Invalid call object received');
             }
 
+            // Log the full call object for debugging
+            console.log('Full call object:', call);
+
             setCurrentCall(call);
             setCallState('connected');
 
             call.on(Call.Event.Disconnected, () => {
+                console.log('Call disconnected');
                 setCallState('disconnected');
                 setCurrentCall(null);
             });
 
             call.on(Call.Event.Error, (error) => {
+                console.error('Call error:', error);
                 setCallState('connectError');
                 Alert.alert('Error', `Failed to connect call: ${error.message}`);
             });
 
         } catch (error) {
+            console.error('Error connecting call:', error);
             setCallState('connectError');
             Alert.alert('Error', `Failed to connect call: ${error.message}`);
         }
     };
+
+    console.log('Rendering ContactScreen with voiceToken:', voiceToken);
 
     return (
         <View style={styles.container}>
