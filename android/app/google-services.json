@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1040949532229",
+    "project_id": "salescaptain-bb9b1",
+    "storage_bucket": "salescaptain-bb9b1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040949532229:android:0b1ee5704a5025cc3e752c",
+        "android_client_info": {
+          "package_name": "com.salescaptain"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7wK7jizyXO-U9LiZrOC7904On7Fr4P-M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
